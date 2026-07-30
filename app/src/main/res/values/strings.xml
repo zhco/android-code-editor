@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Code Editor</string>
+    <string name="new_file">New File</string>
+    <string name="new_folder">New Folder</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="rename">Rename</string>
+    <string name="delete">Delete</string>
+    <string name="import_project">Import Project</string>
+    <string name="imported">Imported: %1$s</string>
+    <string name="copied">Copied</string>
+    <string name="saved">Saved</string>
+    <string name="replace">Replace</string>
+    <string name="replace_all">Replace All</string>
+    <string name="find">Find</string>
+    <string name="replace_with">Replace with</string>
+    <string name="build">Build</string>
+</resources>
