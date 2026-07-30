@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:background="#2a2a2a"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="4dp">
+
+            <ImageButton android:id="@+id/btn_copy"
+                android:layout_width="36dp" android:layout_height="36dp"
+                android:src="@drawable/ic_copy" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Copy" />
+
+            <ImageButton android:id="@+id/btn_paste"
+                android:layout_width="36dp" android:layout_height="36dp"
+                android:src="@drawable/ic_paste" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Paste" />
+
+            <ImageButton android:id="@+id/btn_select_all"
+                android:layout_width="36dp" android:layout_height="36dp"
+                android:src="@drawable/ic_select_all" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Select All" />
+
+            <View android:layout_width="1dp" android:layout_height="28dp" android:background="#555" android:layout_marginHorizontal="4dp" />
+
+            <ImageButton android:id="@+id/btn_undo"
+                android:layout_width="36dp" android:layout_height="36dp"
+                android:src="@drawable/ic_undo" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Undo" />
+
+            <ImageButton android:id="@+id/btn_redo"
+                android:layout_width="36dp" android:layout_height="36dp"
+                android:src="@drawable/ic_redo" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Redo" />
+
+            <View android:layout_width="1dp" android:layout_height="28dp" android:background="#555" android:layout_marginHorizontal="4dp" />
+
+            <ImageButton android:id="@+id/btn_replace"
+                android:layout_width="36dp" android:layout_height="36dp"
+                android:src="@drawable/ic_replace" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Replace" />
+
+            <ImageButton android:id="@+id/btn_save"
+                android:layout_width="36dp" android:layout_height="36dp"
+                android:src="@drawable/ic_save" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Save" />
+        </LinearLayout>
+    </HorizontalScrollView>
+</merge>
