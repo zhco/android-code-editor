@@ -56,8 +56,9 @@ class FileTreeFragment(private val onFileSelected: (File) -> Unit) : Fragment() 
 
     private fun refreshList() {
         binding.currentPath.text = currentDir.absolutePath
-        val files = currentDir.listFiles()?.sortedWith(compareBy<File>({ !it.isDirectory }, { it.name.lowercase() })) ?: emptyArray()
-        adapter.setFiles(files.toList())
+        val rawFiles = currentDir.listFiles() ?: emptyArray()
+        val files = rawFiles.sortedWith(compareBy<File>({ !it.isDirectory }, { it.name.lowercase() }))
+        adapter.setFiles(files)
     }
 
     private fun showNewFileDialog(isFolder: Boolean) {
@@ -79,9 +80,9 @@ class FileTreeFragment(private val onFileSelected: (File) -> Unit) : Fragment() 
 
     private fun showImportDialog() {
         // List directories under /sdcard for import
-        val dirs = Environment.getExternalStorageDirectory()
-            .listFiles { f -> f.isDirectory && !f.name.startsWith(".") }
-            ?.sortedBy { it.name } ?: emptyArray()
+        val importRoot = Environment.getExternalStorageDirectory()
+        val importDirs = importRoot.listFiles { f: File -> f.isDirectory && !f.name.startsWith(".") } ?: emptyArray()
+        val dirs = importDirs.sortedBy { it.name }
         val names = dirs.map { it.name }.toTypedArray()
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.import_project)
