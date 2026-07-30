@@ -15,7 +15,7 @@ class EditorToolbar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : LinearLayout(context, attrs, defStyle) {
 
-    private val binding = ViewEditorToolbarBinding.inflate(LayoutInflater.from(context), this, true)
+    private val binding = ViewEditorToolbarBinding.inflate(LayoutInflater.from(context), this)
     private var editor: CodeEditor? = null
 
     fun setEditor(editor: CodeEditor) {
@@ -44,7 +44,7 @@ class EditorToolbar @JvmOverloads constructor(
     private fun paste() {
         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = cm.primaryClip?.getItemAt(0)?.text?.toString() ?: return
-        editor?.text?.insert(clip)
+        editor?.commitText(clip)
     }
 
     private fun selectAll() {
