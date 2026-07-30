@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#1e1e1e">
+
+    <TextView
+        android:id="@+id/current_path"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:textColor="#aaa"
+        android:textSize="11sp"
+        android:singleLine="true"
+        android:ellipsize="start" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <ImageButton
+            android:id="@+id/btn_up"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_up"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Up" />
+
+        <ImageButton
+            android:id="@+id/btn_new_file"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_file"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="New File" />
+
+        <ImageButton
+            android:id="@+id/btn_new_folder"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_folder"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="New Folder" />
+
+        <ImageButton
+            android:id="@+id/btn_import"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_import"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Import" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/file_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="#333"
+        android:dividerHeight="1dp"
+        android:padding="4dp" />
+</LinearLayout>
