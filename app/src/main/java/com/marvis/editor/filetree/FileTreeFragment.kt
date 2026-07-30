@@ -56,7 +56,7 @@ class FileTreeFragment(private val onFileSelected: (File) -> Unit) : Fragment() 
 
     private fun refreshList() {
         binding.currentPath.text = currentDir.absolutePath
-        val files = currentDir.listFiles()?.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() })) ?: emptyArray()
+        val files = currentDir.listFiles()?.sortedWith(compareBy<File>({ !it.isDirectory }, { it.name.lowercase() })) ?: emptyArray()
         adapter.setFiles(files.toList())
     }
 
