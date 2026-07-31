@@ -19,10 +19,11 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <com.google.android.material.navigation.NavigationView
+    <FrameLayout
         android:id="@+id/file_tree_container"
         android:layout_width="300dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start" />
+        android:layout_gravity="start"
+        android:background="?android:attr/colorBackground" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
