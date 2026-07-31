@@ -8,8 +8,10 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.Toast
 import com.marvis.editor.R
+import com.marvis.editor.build.GradleBuilder
 import com.marvis.editor.databinding.ViewEditorToolbarBinding
 import io.github.rosemoe.sora.widget.CodeEditor
+import java.io.File
 
 class EditorToolbar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
@@ -27,6 +29,7 @@ class EditorToolbar @JvmOverloads constructor(
         binding.btnRedo.setOnClickListener { editor.redo() }
         binding.btnReplace.setOnClickListener { showReplaceDialog() }
         binding.btnSave.setOnClickListener { save() }
+        binding.btnBuild.setOnClickListener { build() }
     }
 
     fun updateUndoRedo() {
@@ -66,5 +69,29 @@ class EditorToolbar @JvmOverloads constructor(
         val f = file?.getCurrentFile() ?: return
         f.writeText(editor?.text?.toString() ?: return)
         Toast.makeText(context, R.string.saved, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun build() {
+        val file = (context as? androidx.fragment.app.FragmentActivity)
+            ?.supportFragmentManager
+            ?.findFragmentById(R.id.editor_container) as? EditorFragment
+        val f = file?.getCurrentFile() ?: run {
+            Toast.makeText(context, "No file open", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val projectDir = findProjectRoot(f) ?: run {
+            Toast.makeText(context, "gradlew not found in parent directories", Toast.LENGTH_SHORT).show()
+            return
+        }
+        GradleBuilder.showOutputDialog(context, projectDir)
+    }
+
+    private fun findProjectRoot(file: File): File? {
+        var dir: File? = file.parentFile
+        while (dir != null) {
+            if (File(dir, "gradlew").exists()) return dir
+            dir = dir.parentFile
+        }
+        return null
     }
 }
