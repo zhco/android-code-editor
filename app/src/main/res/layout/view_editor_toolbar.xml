@@ -52,6 +52,13 @@
                 android:layout_width="36dp" android:layout_height="36dp"
                 android:src="@drawable/ic_save" android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Save" />
+
+            <View android:layout_width="1dp" android:layout_height="28dp" android:background="#555" android:layout_marginHorizontal="4dp" />
+
+            <ImageButton android:id="@+id/btn_build"
+                android:layout_width="36dp" android:layout_height="36dp"
+                android:src="@drawable/ic_build" android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Build" />
         </LinearLayout>
     </HorizontalScrollView>
 </merge>
