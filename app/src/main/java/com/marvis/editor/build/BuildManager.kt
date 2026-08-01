@@ -170,8 +170,7 @@ class BuildManager(private val context: Context) {
         val textView = TextView(context).apply {
             setPadding(32, 32, 32, 32)
             setTextIsSelectable(true)
-            text = "Building...
-"
+            text = "Building...\n"
         }
         val scrollView = ScrollView(context).apply { addView(textView) }
         val dialog = AlertDialog.Builder(context)
@@ -187,12 +186,9 @@ class BuildManager(private val context: Context) {
                 val result = build(projectDir, "assembleDebug") { output ->
                     textView.append(output)
                 }
-                textView.append("
----
-${if (result.isSuccess) "BUILD SUCCESS" else "BUILD FAILED: ${(result as BuildResult.Failure).message}"}")
+                textView.append("\n---\n${if (result.isSuccess) "BUILD SUCCESS" else "BUILD FAILED: ${(result as BuildResult.Failure).message}"}")
             } catch (e: Exception) {
-                textView.append("
-Error: ${e.message}")
+                textView.append("\nError: ${e.message}")
             }
         }
     }
