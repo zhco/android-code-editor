@@ -5,6 +5,12 @@ import android.util.Log
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.InputStreamReader
+import android.app.AlertDialog
+import android.widget.ScrollView
+import android.widget.TextView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class BuildManager(private val context: Context) {
 
@@ -160,6 +166,37 @@ class BuildManager(private val context: Context) {
      * Returns true if bundled build-tools are available (extracted from assets).
      * No Termux dependency — all tools shipped inside the APK.
      */
+    fun showOutputDialog(context: Context, projectDir: File) {
+        val textView = TextView(context).apply {
+            setPadding(32, 32, 32, 32)
+            setTextIsSelectable(true)
+            text = "Building...
+"
+        }
+        val scrollView = ScrollView(context).apply { addView(textView) }
+        val dialog = AlertDialog.Builder(context)
+            .setTitle("Build Output")
+            .setView(scrollView)
+            .setNegativeButton("Close") { d, _ -> d.dismiss() }
+            .create()
+        dialog.show()
+
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            try {
+                val result = build(projectDir, "assembleDebug") { output ->
+                    textView.append(output)
+                }
+                textView.append("
+---
+${if (result.isSuccess) "BUILD SUCCESS" else "BUILD FAILED: ${(result as BuildResult.Failure).message}"}")
+            } catch (e: Exception) {
+                textView.append("
+Error: ${e.message}")
+            }
+        }
+    }
+
     fun isBuildToolsReady(): Boolean {
         val btDir = File(sdkDir, "build-tools/35.0.0")
         return File(btDir, "aapt2").exists() && File(btDir, "d8").exists()
