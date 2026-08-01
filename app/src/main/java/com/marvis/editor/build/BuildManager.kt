@@ -1,165 +1,178 @@
 package com.marvis.editor.build
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
-import android.widget.ScrollView
-import android.widget.TextView
-import androidx.core.content.FileProvider
 import kotlinx.coroutines.*
-import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
-object BuildManager {
+class BuildManager(private val context: Context) {
 
-    private const val TAG = "BuildManager"
-    private var buildJob: Job? = null
-    private var ctx: Context? = null
-
-    private lateinit var sdkDir: File
-    private lateinit var gradleHome: File
-    private lateinit var platformDir: File
-    private lateinit var gradleUserHome: File
-
-    fun init(context: Context) {
-        if (ctx != null) return
-        ctx = context.applicationContext
-        sdkDir = File(context.filesDir, "android-toolchain")
-        gradleHome = File(sdkDir, "gradle-8.5")
-        platformDir = File(sdkDir, "platforms/android-35")
-        gradleUserHome = File(context.filesDir, ".gradle")
+    companion object {
+        private const val TAG = "BuildManager"
     }
 
-    fun isToolchainReady() =
-        File(platformDir, "android.jar").exists() && File(gradleHome, "bin/gradle").exists()
+    // SDK extracted to internal storage
+    private val sdkDir get() = File(context.filesDir, "android-toolchain")
+    private val gradleHome get() = File(sdkDir, "gradle-8.5")
+    private val platformDir get() = File(sdkDir, "platforms/android-35")
+    private val buildToolsDir get() = File(sdkDir, "build-tools")
 
-    fun extractToolchain(onProgress: (String) -> Unit) {
-        val c = ctx ?: return
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                if (isToolchainReady()) {
-                    withContext(Dispatchers.Main) { onProgress("Toolchain already ready") }
-                    return@launch
-                }
-                sdkDir.mkdirs()
-                withContext(Dispatchers.Main) { onProgress("Extracting Gradle...") }
-                extractDir(c, "gradle-toolchain", sdkDir)
-                val pd = File(sdkDir, "platforms/android-35")
-                pd.mkdirs()
-                withContext(Dispatchers.Main) { onProgress("Extracting platform...") }
-                extractDir(c, "android-platform", pd)
-                withContext(Dispatchers.Main) { onProgress("Toolchain ready") }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) { onProgress("ERROR: ${e.message}") }
+    val gradleUserHome get() = File(context.filesDir, ".gradle")
+    val projectsDir get() = File(context.getExternalFilesDir(null) ?: context.filesDir, "projects")
+
+    fun isToolchainReady(): Boolean {
+        return File(platformDir, "android.jar").exists() &&
+               File(gradleHome, "bin/gradle").exists()
+    }
+
+    fun extractToolchain(onProgress: (String) -> Unit): Result<Unit> {
+        return try {
+            if (isToolchainReady()) {
+                onProgress("Toolchain already extracted")
+                return Result.success(Unit)
             }
+
+            sdkDir.mkdirs()
+
+            // 1. Extract Gradle distribution
+            onProgress("Extracting Gradle...")
+            extractAssetDir("gradle-toolchain", sdkDir)
+
+            // 2. Extract Android platform
+            onProgress("Extracting Android platform...")
+            extractAssetDir("android-platform", sdkDir.apply {
+                File(this, "platforms/android-35").mkdirs()
+            })
+
+            // Move platform files to correct location
+            val extractedPlatform = File(sdkDir, "android-platform")
+            if (extractedPlatform.exists()) {
+                val targetPlatform = File(sdkDir, "platforms/android-35")
+                extractedPlatform.listFiles()?.forEach { file ->
+                    file.renameTo(File(targetPlatform, file.name))
+                }
+                extractedPlatform.deleteRecursively()
+            }
+
+            // 3. Extract bundled build-tools (no Termux needed)
+            onProgress("Extracting build-tools...")
+            val btDir = File(sdkDir, "build-tools/35.0.0")
+            btDir.mkdirs()
+            extractAssetDir("build-tools", btDir)
+
+            // Ensure executables after extraction (aapt/aapt2/aidl/zipalign/d8/apksigner)
+            val toolsToFix = listOf("aapt", "aapt2", "aidl", "zipalign", "d8", "apksigner")
+            for (tool in toolsToFix) {
+                val f = File(btDir, tool)
+                if (f.exists()) f.setExecutable(true, false)
+            }
+
+            onProgress("Toolchain extracted (build-tools included)")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to extract toolchain", e)
+            Result.failure(e)
         }
     }
 
-    private fun extractDir(context: Context, assetPath: String, destDir: File) {
+    private fun extractAssetDir(assetPath: String, destDir: File) {
         destDir.mkdirs()
         val children = context.assets.list(assetPath) ?: return
         for (child in children) {
-            val cp = "$assetPath/$child"
-            val cd = File(destDir, child)
-            val sub = context.assets.list(cp)
+            val childPath = "$assetPath/$child"
+            val childDest = File(destDir, child)
+            val sub = context.assets.list(childPath)
             if (sub != null && sub.isNotEmpty()) {
-                cd.mkdirs()
-                extractDir(context, cp, cd)
+                childDest.mkdirs()
+                extractAssetDir(childPath, childDest)
             } else {
                 try {
-                    cd.parentFile?.mkdirs()
-                    context.assets.open(cp).use { it.copyTo(cd.outputStream()) }
-                } catch (e: Exception) { Log.w(TAG, "Skip $cp: ${e.message}") }
-            }
-        }
-    }
-
-    fun tryGetTermuxBuildTools(): Boolean {
-        val tp = "/data/data/com.termux/files/usr"
-        if (!File(tp, "bin/aapt2").exists() || !File(tp, "bin/d8").exists()) return false
-        val btDir = File(sdkDir, "build-tools/35.0.0")
-        btDir.mkdirs()
-        listOf("aapt2", "d8", "zipalign", "apksigner").forEach { tool ->
-            val src = File(tp, "bin/$tool")
-            if (src.exists()) {
-                val dst = File(btDir, tool)
-                if (!dst.exists()) {
-                    try { Runtime.getRuntime().exec(arrayOf("ln", "-sf", src.absolutePath, dst.absolutePath)).waitFor() }
-                    catch (e: Exception) { Log.w(TAG, "link $tool: ${e.message}") }
-                }
-            }
-        }
-        return true
-    }
-
-    fun showOutputDialog(context: Context, projectDir: File) {
-        init(context)
-        val c = ctx!!
-        val tv = TextView(context).apply {
-            setPadding(32, 32, 32, 32); textSize = 12f; setTextIsSelectable(true); text = "Initializing...\n"
-        }
-        val sv = ScrollView(context); sv.addView(tv)
-
-        val dialog = AlertDialog.Builder(context)
-            .setTitle("Gradle Build").setView(sv)
-            .setPositiveButton("Close", null)
-            .setNegativeButton("Cancel") { _, _ -> cancel() }.create()
-        dialog.show()
-
-        if (!tryGetTermuxBuildTools()) {
-            tv.append("WARNING: Termux build-tools not found.\nInstall Termux and run:\n  pkg install aapt2 d8 zipalign apksigner\n\n")
-        }
-
-        buildJob = CoroutineScope(Dispatchers.IO).launch {
-            val gw = File(projectDir, "gradlew")
-            if (!gw.exists()) {
-                withContext(Dispatchers.Main) { tv.append("ERROR: gradlew not found\n") }
-                return@launch
-            }
-            gw.setExecutable(true, false)
-            val env = HashMap(System.getenv())
-            env["ANDROID_HOME"] = sdkDir.absolutePath
-            env["ANDROID_SDK_ROOT"] = sdkDir.absolutePath
-            env["GRADLE_USER_HOME"] = gradleUserHome.absolutePath
-            env["GRADLE_HOME"] = gradleHome.absolutePath
-            val pb = ProcessBuilder()
-                .directory(projectDir)
-                .command("sh", gw.absolutePath, "assembleDebug", "--no-daemon", "--stacktrace")
-                .redirectErrorStream(true)
-            pb.environment().putAll(env)
-            val p = pb.start()
-            val r = BufferedReader(InputStreamReader(p.inputStream))
-            var l: String?
-            while (r.readLine().also { l = it } != null) {
-                withContext(Dispatchers.Main) { tv.append("$l\n") }
-            }
-            val ec = p.waitFor()
-            withContext(Dispatchers.Main) {
-                if (ec == 0) {
-                    tv.append("\nBUILD SUCCESSFUL\n")
-                    val apk = File(projectDir, "app/build/outputs/apk/debug").listFiles { f -> f.name.endsWith(".apk") }?.firstOrNull()
-                    if (apk != null) {
-                        tv.append("APK: ${apk.name}\n")
-                        try {
-                            val uri = FileProvider.getUriForFile(c, "${c.packageName}.fileprovider", apk)
-                            val intent = Intent(Intent.ACTION_VIEW).apply {
-                                setDataAndType(uri, "application/vnd.android.package-archive")
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
-                            c.startActivity(intent)
-                        } catch (e: Exception) {
-                            Runtime.getRuntime().exec(arrayOf("pm", "install", "-r", apk.absolutePath)).waitFor()
-                        }
+                    context.assets.open(childPath).use { input ->
+                        childDest.parentFile?.mkdirs()
+                        childDest.outputStream().use { output -> input.copyTo(output) }
                     }
-                } else {
-                    tv.append("\nBUILD FAILED (exit=$ec)\n")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Skip asset: $childPath — ${e.message}")
                 }
             }
         }
     }
 
-    fun cancel() { buildJob?.cancel() }
+    suspend fun build(
+        projectDir: File,
+        task: String = "assembleDebug",
+        onOutput: (String) -> Unit
+    ): BuildResult = withContext(Dispatchers.IO) {
+        val gradlew = File(projectDir, "gradlew")
+        if (!gradlew.exists()) {
+            return@withContext BuildResult.Failure("gradlew not found in ${projectDir.absolutePath}", -1)
+        }
+        gradlew.setExecutable(true, false)
+
+        // Build environment
+        val env = HashMap(System.getenv())
+        env["ANDROID_HOME"] = sdkDir.absolutePath
+        env["ANDROID_SDK_ROOT"] = sdkDir.absolutePath
+        env["GRADLE_USER_HOME"] = gradleUserHome.absolutePath
+        env["GRADLE_HOME"] = gradleHome.absolutePath
+
+        try {
+            val process = Runtime.getRuntime().exec(
+                arrayOf("sh", gradlew.absolutePath, task, "--no-daemon", "--stacktrace"),
+                env.toTypedArray(),
+                projectDir
+            )
+
+            val reader = InputStreamReader(process.inputStream).buffered()
+            val sb = StringBuilder()
+
+            // Use coroutine-based reading
+            var line: String?
+            var curChar: Int
+            val charBuf = CharArray(256)
+            while (reader.read(charBuf).also { curChar = it } != -1) {
+                val text = String(charBuf, 0, curChar)
+                sb.append(text)
+                withContext(Dispatchers.Main) { onOutput(text) }
+            }
+
+            val exitCode = process.waitFor()
+
+            if (exitCode == 0) {
+                val apk = findApk(projectDir)
+                BuildResult.Success(apk, exitCode)
+            } else {
+                BuildResult.Failure("Build failed (exit=$exitCode)", exitCode)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Build error", e)
+            BuildResult.Failure(e.message ?: "Unknown error", -1)
+        }
+    }
+
+    private fun findApk(projectDir: File): File? {
+        val debugDir = File(projectDir, "app/build/outputs/apk/debug")
+        return debugDir.listFiles { f -> f.name.endsWith(".apk") }?.firstOrNull()
+    }
+
+    /**
+     * Returns true if bundled build-tools are available (extracted from assets).
+     * No Termux dependency — all tools shipped inside the APK.
+     */
+    fun isBuildToolsReady(): Boolean {
+        val btDir = File(sdkDir, "build-tools/35.0.0")
+        return File(btDir, "aapt2").exists() && File(btDir, "d8").exists()
+    }
+}
+
+sealed class BuildResult {
+    val isSuccess get() = this is Success
+    data class Success(val apkFile: File?, val exitCode: Int) : BuildResult()
+    data class Failure(val message: String, val exitCode: Int) : BuildResult()
+}
+
+// Helper to convert Map to Array for ProcessBuilder/Runtime.exec
+private fun Map<String, String>.toTypedArray(): Array<String> {
+    return entries.map { "${it.key}=${it.value}" }.toTypedArray()
 }
