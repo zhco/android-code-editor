@@ -74,12 +74,40 @@ class BuildManager(private val context: Context) {
                 if (f.exists()) f.setExecutable(true, false)
             }
 
+            onProgress("Writing Gradle mirror config...")
+            writeInitScript()
+
             onProgress("Toolchain extracted (build-tools included)")
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to extract toolchain", e)
             Result.failure(e)
         }
+    }
+
+    /**
+     * Writes ~/.gradle/init.d/mirrors.gradle with Chinese mainland mirrors
+     * to accelerate dependency downloads (Maven Central, Google Maven, Gradle Plugin Portal).
+     */
+    private fun writeInitScript() {
+        val initDir = File(gradleUserHome, "init.d")
+        initDir.mkdirs()
+        val initFile = File(initDir, "mirrors.gradle")
+        initFile.writeText("""
+// Auto-generated: Chinese mainland mirrors for Gradle
+// Tencent Cloud mirrors first; upstream as fallback.
+
+settingsEvaluated { settings ->
+    settings.dependencyResolutionManagement.repositories {
+        maven { url = uri("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/") }
+        maven { url = uri("https://mirrors.cloud.tencent.com/nexus/repository/google-maven/") }
+        maven { url = uri("https://mirrors.cloud.tencent.com/nexus/repository/gradle-plugin/") }
+        mavenCentral()
+        google()
+        gradlePluginPortal()
+    }
+}
+""".trimIndent())
     }
 
     private fun extractAssetDir(assetPath: String, destDir: File) {
@@ -122,6 +150,7 @@ class BuildManager(private val context: Context) {
         env["ANDROID_SDK_ROOT"] = sdkDir.absolutePath
         env["GRADLE_USER_HOME"] = gradleUserHome.absolutePath
         env["GRADLE_HOME"] = gradleHome.absolutePath
+        env["GRADLE_OPTS"] = "-Dorg.gradle.daemon=true"
 
         try {
             val process = Runtime.getRuntime().exec(
