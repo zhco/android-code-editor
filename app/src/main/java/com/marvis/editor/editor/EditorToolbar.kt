@@ -8,7 +8,7 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.Toast
 import com.marvis.editor.R
-import com.marvis.editor.build.GradleBuilder
+import com.marvis.editor.build.BuildManager
 import com.marvis.editor.databinding.ViewEditorToolbarBinding
 import io.github.rosemoe.sora.widget.CodeEditor
 import java.io.File
@@ -83,7 +83,7 @@ class EditorToolbar @JvmOverloads constructor(
             Toast.makeText(context, "gradlew not found in parent directories", Toast.LENGTH_SHORT).show()
             return
         }
-        GradleBuilder.showOutputDialog(context, projectDir)
+        BuildManager.showOutputDialog(context, projectDir)
     }
 
     private fun findProjectRoot(file: File): File? {
