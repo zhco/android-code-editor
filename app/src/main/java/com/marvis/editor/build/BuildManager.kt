@@ -99,8 +99,7 @@ object BuildManager {
         init(context)
         val c = ctx!!
         val tv = TextView(context).apply {
-            setPadding(32, 32, 32, 32); textSize = 12f; setTextIsSelectable(true); text = "Initializing...
-"
+            setPadding(32, 32, 32, 32); textSize = 12f; setTextIsSelectable(true); text = "Initializing...\n"
         }
         val sv = ScrollView(context); sv.addView(tv)
 
@@ -111,18 +110,13 @@ object BuildManager {
         dialog.show()
 
         if (!tryGetTermuxBuildTools()) {
-            tv.append("WARNING: Termux build-tools not found.
-Install Termux and run:
-  pkg install aapt2 d8 zipalign apksigner
-
-")
+            tv.append("WARNING: Termux build-tools not found.\nInstall Termux and run:\n  pkg install aapt2 d8 zipalign apksigner\n\n")
         }
 
         buildJob = CoroutineScope(Dispatchers.IO).launch {
             val gw = File(projectDir, "gradlew")
             if (!gw.exists()) {
-                withContext(Dispatchers.Main) { tv.append("ERROR: gradlew not found
-") }
+                withContext(Dispatchers.Main) { tv.append("ERROR: gradlew not found\n") }
                 return@launch
             }
             gw.setExecutable(true, false)
@@ -146,9 +140,7 @@ Install Termux and run:
             val ec = p.waitFor()
             withContext(Dispatchers.Main) {
                 if (ec == 0) {
-                    tv.append("
-BUILD SUCCESSFUL
-")
+                    tv.append("\nBUILD SUCCESSFUL\n")
                     val apk = File(projectDir, "app/build/outputs/apk/debug").listFiles { f -> f.name.endsWith(".apk") }?.firstOrNull()
                     if (apk != null) {
                         tv.append("APK: ${apk.name}
@@ -165,9 +157,7 @@ BUILD SUCCESSFUL
                         }
                     }
                 } else {
-                    tv.append("
-BUILD FAILED (exit=$ec)
-")
+                    tv.append("\nBUILD FAILED (exit=$ec)\n")
                 }
             }
         }
