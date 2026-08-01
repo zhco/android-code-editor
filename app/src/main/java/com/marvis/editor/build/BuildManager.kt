@@ -134,8 +134,7 @@ object BuildManager {
             val r = BufferedReader(InputStreamReader(p.inputStream))
             var l: String?
             while (r.readLine().also { l = it } != null) {
-                withContext(Dispatchers.Main) { tv.append("$l
-") }
+                withContext(Dispatchers.Main) { tv.append("$l\n") }
             }
             val ec = p.waitFor()
             withContext(Dispatchers.Main) {
@@ -143,8 +142,7 @@ object BuildManager {
                     tv.append("\nBUILD SUCCESSFUL\n")
                     val apk = File(projectDir, "app/build/outputs/apk/debug").listFiles { f -> f.name.endsWith(".apk") }?.firstOrNull()
                     if (apk != null) {
-                        tv.append("APK: ${apk.name}
-")
+                        tv.append("APK: ${apk.name}\n")
                         try {
                             val uri = FileProvider.getUriForFile(c, "${c.packageName}.fileprovider", apk)
                             val intent = Intent(Intent.ACTION_VIEW).apply {
