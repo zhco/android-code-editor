@@ -1,31 +1,29 @@
 package com.marvis.editor
 
-import android.os.Build
 import android.os.Bundle
-import android.widget.TextView
-import android.widget.ScrollView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.marvis.editor.filetree.FileTreeFragment
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Toast.makeText(this, "Step 1: onCreate", Toast.LENGTH_SHORT).show()
 
-        val info = buildString {
-            appendLine("Code Editor v40")
-            appendLine("Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
-            appendLine("Manufacturer: ${Build.MANUFACTURER}")
-            appendLine("Model: ${Build.MODEL}")
-            appendLine()
-            appendLine("All good - activity loaded successfully.")
+        val fragment = FileTreeFragment { file ->
+            Toast.makeText(this, "File selected: ${file.name}", Toast.LENGTH_SHORT).show()
         }
 
-        val scroll = ScrollView(this)
-        val text = TextView(this).apply {
-            textSize = 14f
-            setPadding(48, 48, 48, 48)
-            text = info
-        }
-        scroll.addView(text)
-        setContentView(scroll)
+        Toast.makeText(this, "Step 2: Fragment created", Toast.LENGTH_SHORT).show()
+
+        setContentView(android.widget.FrameLayout(this).apply {
+            id = android.R.id.content
+        })
+
+        supportFragmentManager.beginTransaction()
+            .replace(android.R.id.content, fragment)
+            .commit()
+
+        Toast.makeText(this, "Step 3: Fragment added", Toast.LENGTH_SHORT).show()
     }
 }
