@@ -28,8 +28,8 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
-        aaptOptions {
-        noCompress += listOf("")
+    aaptOptions {
+        noCompress 'targz', 'tar.gz', 'zip'
     }
 
     buildFeatures {
