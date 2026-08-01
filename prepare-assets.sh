@@ -50,12 +50,22 @@ extract_deb() {
     mkdir -p "$work" "$dest"
 
     echo "    Extracting $(basename "$deb") ..."
-    # ar x -> data.tar.xz or data.tar.gz
-    (cd "$work" && ar x "$deb" data.tar.* 2>/dev/null)
-    local data_tar
-    data_tar=$(echo "$work"/data.tar.*)
-    if [ ! -f "$data_tar" ]; then
+
+    # List archive contents to find the exact data.tar.* name
+    local data_tar_name
+    data_tar_name=$(ar t "$deb" | grep '^data\.tar\.' | head -1)
+    if [ -z "$data_tar_name" ]; then
         echo "    ERROR: no data.tar.* found in $deb"
+        echo "    Archive contents:"
+        ar t "$deb"
+        return 1
+    fi
+
+    # Extract data archive by exact name
+    (cd "$work" && ar x "$deb" "$data_tar_name")
+    local data_tar="$work/$data_tar_name"
+    if [ ! -f "$data_tar" ]; then
+        echo "    ERROR: failed to extract $data_tar_name from $deb"
         return 1
     fi
 
