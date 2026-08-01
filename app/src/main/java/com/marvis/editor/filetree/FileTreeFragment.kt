@@ -16,7 +16,7 @@ class FileTreeFragment(private val onFileSelected: (File) -> Unit) : Fragment() 
     private var _binding: FragmentFileTreeBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: FileTreeAdapter
-    private var currentDir: File = Environment.getExternalStorageDirectory()
+    private lateinit var currentDir: File
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentFileTreeBinding.inflate(inflater, container, false)
@@ -25,6 +25,7 @@ class FileTreeFragment(private val onFileSelected: (File) -> Unit) : Fragment() 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        currentDir = context.getExternalFilesDir(null) ?: Environment.getExternalStorageDirectory()
         adapter = FileTreeAdapter(requireContext(), onFileSelected)
 
         binding.fileList.adapter = adapter
