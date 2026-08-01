@@ -83,7 +83,7 @@ class EditorToolbar @JvmOverloads constructor(
             Toast.makeText(context, "gradlew not found in parent directories", Toast.LENGTH_SHORT).show()
             return
         }
-        BuildManager.showOutputDialog(context, projectDir)
+        BuildManager(context).showOutputDialog(context, projectDir)
     }
 
     private fun findProjectRoot(file: File): File? {
