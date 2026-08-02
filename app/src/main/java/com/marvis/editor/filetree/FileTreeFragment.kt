@@ -21,7 +21,7 @@ class FileTreeFragment(private val onFileSelected: (File) -> Unit) : Fragment() 
         val ctx = requireContext()
         return LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
-            layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
             // Toolbar row
             val toolbar = LinearLayout(ctx).apply {
@@ -63,7 +63,7 @@ class FileTreeFragment(private val onFileSelected: (File) -> Unit) : Fragment() 
 
             // File list
             fileList = ListView(ctx)
-            addView(fileList, ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+            addView(fileList, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         }
     }
 
