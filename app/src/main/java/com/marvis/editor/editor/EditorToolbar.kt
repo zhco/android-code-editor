@@ -6,8 +6,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.HorizontalScrollView
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Toast
 import com.marvis.editor.R
@@ -19,14 +19,14 @@ class EditorToolbar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : HorizontalScrollView(context, attrs, defStyle) {
 
-    private val btnCopy: ImageButton
-    private val btnPaste: ImageButton
-    private val btnSelectAll: ImageButton
-    private val btnUndo: ImageButton
-    private val btnRedo: ImageButton
-    private val btnReplace: ImageButton
-    private val btnSave: ImageButton
-    private val btnBuild: ImageButton
+    private val btnCopy: Button
+    private val btnPaste: Button
+    private val btnSelectAll: Button
+    private val btnUndo: Button
+    private val btnRedo: Button
+    private val btnReplace: Button
+    private val btnSave: Button
+    private val btnBuild: Button
     private var editor: CodeEditor? = null
 
     init {
@@ -40,8 +40,8 @@ class EditorToolbar @JvmOverloads constructor(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         }
 
-        fun makeBtn(label: String): ImageButton {
-            val btn = ImageButton(context).apply {
+        fun makeBtn(label: String): Button {
+            val btn = Button(context).apply {
                 val pad = (4 * context.resources.displayMetrics.density).toInt()
                 setPadding(pad, pad, pad, pad)
                 minimumWidth = (36 * context.resources.displayMetrics.density).toInt()
