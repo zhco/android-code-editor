@@ -4,14 +4,15 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.TextView
 import android.widget.LinearLayout
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.marvis.editor.editor.EditorFragment
 import com.marvis.editor.filetree.FileTreeFragment
 
 class MainActivity : AppCompatActivity() {
     private var fileTreeFragment: FileTreeFragment? = null
+    private var editorFragment: EditorFragment? = null
     private lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,11 +22,16 @@ class MainActivity : AppCompatActivity() {
             fitsSystemWindows = true
         }
 
-        // Main content: placeholder
-        val mainContent = TextView(this).apply {
-            text = "select a file from the drawer"
-            gravity = Gravity.CENTER
+        // Main content: editor
+        val mainContent = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
         }
+
+        val editorContainer = FrameLayout(this).apply {
+            id = ViewGroup.generateViewId()
+        }
+        mainContent.addView(editorContainer, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
 
         // Side drawer: file tree
         val fileTreeContainer = FrameLayout(this).apply {
@@ -42,11 +48,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(drawerLayout)
 
         fileTreeFragment = FileTreeFragment { file ->
-            // TODO: open in editor
+            drawerLayout.closeDrawers()
+            editorFragment?.openFile(file)
         }
+        editorFragment = EditorFragment()
 
         supportFragmentManager.beginTransaction()
             .replace(fileTreeContainer.id, fileTreeFragment!!)
+            .replace(editorContainer.id, editorFragment!!)
             .commit()
     }
 }
