@@ -4,37 +4,95 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.util.AttributeSet
-import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.HorizontalScrollView
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Toast
 import com.marvis.editor.R
 import com.marvis.editor.build.BuildManager
-import com.marvis.editor.databinding.ViewEditorToolbarBinding
 import io.github.rosemoe.sora.widget.CodeEditor
 import java.io.File
 
 class EditorToolbar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
-) : LinearLayout(context, attrs, defStyle) {
+) : HorizontalScrollView(context, attrs, defStyle) {
 
-    private val binding = ViewEditorToolbarBinding.inflate(LayoutInflater.from(context), this)
+    private val btnCopy: ImageButton
+    private val btnPaste: ImageButton
+    private val btnSelectAll: ImageButton
+    private val btnUndo: ImageButton
+    private val btnRedo: ImageButton
+    private val btnReplace: ImageButton
+    private val btnSave: ImageButton
+    private val btnBuild: ImageButton
     private var editor: CodeEditor? = null
+
+    init {
+        isHorizontalScrollBarEnabled = false
+        val row = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor(0xFF2a2a2a.toInt())
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(4, 4, 4, 4)
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+
+        fun makeBtn(label: String): ImageButton {
+            val btn = ImageButton(context).apply {
+                val pad = (4 * context.resources.displayMetrics.density).toInt()
+                setPadding(pad, pad, pad, pad)
+                minimumWidth = (36 * context.resources.displayMetrics.density).toInt()
+                minimumHeight = (36 * context.resources.displayMetrics.density).toInt()
+                text = label
+                setBackgroundResource(android.R.attr.selectableItemBackgroundBorderless)
+            }
+            row.addView(btn)
+            return btn
+        }
+
+        fun separator() {
+            row.addView(View(context).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    (1 * context.resources.displayMetrics.density).toInt(),
+                    (24 * context.resources.displayMetrics.density).toInt()
+                ).apply { setMargins(4, 0, 4, 0) }
+                setBackgroundColor(0xFF555555.toInt())
+            })
+        }
+
+        btnCopy = makeBtn("Cp")
+        btnPaste = makeBtn("Ps")
+        btnSelectAll = makeBtn("SA")
+        separator()
+        btnUndo = makeBtn("<-")
+        btnRedo = makeBtn("->")
+        separator()
+        btnReplace = makeBtn("Rp")
+        btnSave = makeBtn("Sv")
+        separator()
+        btnBuild = makeBtn("Bld")
+
+        addView(row)
+    }
 
     fun setEditor(editor: CodeEditor) {
         this.editor = editor
-        binding.btnCopy.setOnClickListener { copy() }
-        binding.btnPaste.setOnClickListener { paste() }
-        binding.btnSelectAll.setOnClickListener { selectAll() }
-        binding.btnUndo.setOnClickListener { editor.undo() }
-        binding.btnRedo.setOnClickListener { editor.redo() }
-        binding.btnReplace.setOnClickListener { showReplaceDialog() }
-        binding.btnSave.setOnClickListener { save() }
-        binding.btnBuild.setOnClickListener { build() }
+        btnCopy.setOnClickListener { copy() }
+        btnPaste.setOnClickListener { paste() }
+        btnSelectAll.setOnClickListener { selectAll() }
+        btnUndo.setOnClickListener { editor.undo() }
+        btnRedo.setOnClickListener { editor.redo() }
+        btnReplace.setOnClickListener { showReplaceDialog() }
+        btnSave.setOnClickListener { save() }
+        btnBuild.setOnClickListener { build() }
     }
 
     fun updateUndoRedo() {
-        binding.btnUndo.isEnabled = editor?.canUndo() == true
-        binding.btnRedo.isEnabled = editor?.canRedo() == true
+        btnUndo.isEnabled = editor?.canUndo() == true
+        btnRedo.isEnabled = editor?.canRedo() == true
     }
 
     private fun copy() {
