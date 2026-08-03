@@ -23,25 +23,19 @@ class EditorFragment : Fragment() {
             fileName = TextView(ctx).apply {
                 setPadding(8, 8, 8, 8)
                 textSize = 12f
-                text = "Editor"
             }
             addView(fileName, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+
+            val toolbar = EditorToolbar(ctx)
+            addView(toolbar, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
             editor = CodeEditor(ctx)
             addView(editor, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
 
-            // Toolbar test
-            try {
-                val toolbar = EditorToolbar(ctx)
-                toolbar.setEditor(editor)
-                addView(toolbar, 0, LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-                fileName.text = "Toolbar OK"
-            } catch (e: Exception) {
-                fileName.text = "TB err: " + (e.message ?: e.toString())
-            }
+            toolbar.setEditor(editor)
         }
     }
 
