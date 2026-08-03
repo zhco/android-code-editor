@@ -28,20 +28,20 @@ class EditorFragment : Fragment() {
             addView(fileName, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
-            // Toolbar: instantiate only, don't add to layout
-            try {
-                val toolbar = EditorToolbar(ctx)
-                toolbar.setEditor(editor)
-                addView(toolbar, LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-                fileName.text = "Toolbar ok"
-            } catch (e: Exception) {
-                fileName.text = "Toolbar ERR: " + e.message
-            }
-
             editor = CodeEditor(ctx)
             addView(editor, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+
+            // Toolbar test
+            try {
+                val toolbar = EditorToolbar(ctx)
+                toolbar.setEditor(editor)
+                addView(toolbar, 0, LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+                fileName.text = "Toolbar OK"
+            } catch (e: Exception) {
+                fileName.text = "TB err: " + (e.message ?: e.toString())
+            }
         }
     }
 
