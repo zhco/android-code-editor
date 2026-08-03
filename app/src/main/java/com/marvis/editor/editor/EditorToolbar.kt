@@ -47,7 +47,6 @@ class EditorToolbar @JvmOverloads constructor(
                 minimumWidth = (36 * context.resources.displayMetrics.density).toInt()
                 minimumHeight = (36 * context.resources.displayMetrics.density).toInt()
                 text = label
-                setBackgroundResource(android.R.attr.selectableItemBackgroundBorderless)
             }
             row.addView(btn)
             return btn
