@@ -23,7 +23,6 @@ class MainActivity : AppCompatActivity() {
             fitsSystemWindows = true
         }
 
-        // Main content: editor
         val mainContent = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
@@ -34,7 +33,6 @@ class MainActivity : AppCompatActivity() {
         mainContent.addView(editorContainer, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
 
-        // Side drawer: file tree
         val fileTreeContainer = FrameLayout(this).apply {
             id = ViewGroup.generateViewId()
         }
@@ -59,11 +57,14 @@ class MainActivity : AppCompatActivity() {
             .replace(editorContainer.id, editorFragment!!)
             .commit()
 
-        editorFragment?.setDrawerCallback {
-            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                drawerLayout.closeDrawer(GravityCompat.START)
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START)
+        // Defer callback until fragment view is created
+        editorContainer.post {
+            editorFragment?.setDrawerCallback {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    drawerLayout.openDrawer(GravityCompat.START)
+                }
             }
         }
     }
