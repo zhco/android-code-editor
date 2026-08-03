@@ -19,6 +19,7 @@ class EditorToolbar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyle: Int = 0
 ) : HorizontalScrollView(context, attrs, defStyle) {
 
+    private val btnHamburger: Button
     private val btnCopy: Button
     private val btnPaste: Button
     private val btnSelectAll: Button
@@ -28,6 +29,7 @@ class EditorToolbar @JvmOverloads constructor(
     private val btnSave: Button
     private val btnBuild: Button
     private var editor: CodeEditor? = null
+    private var drawerCallback: (() -> Unit)? = null
 
     init {
         isHorizontalScrollBarEnabled = false
@@ -62,6 +64,8 @@ class EditorToolbar @JvmOverloads constructor(
             })
         }
 
+        btnHamburger = makeBtn("☰")
+        separator()
         btnCopy = makeBtn("Cp")
         btnPaste = makeBtn("Ps")
         btnSelectAll = makeBtn("SA")
@@ -74,7 +78,13 @@ class EditorToolbar @JvmOverloads constructor(
         separator()
         btnBuild = makeBtn("Bld")
 
+        btnHamburger.setOnClickListener { drawerCallback?.invoke() }
+
         addView(row)
+    }
+
+    fun setDrawerCallback(callback: () -> Unit) {
+        drawerCallback = callback
     }
 
     fun setEditor(editor: CodeEditor) {
