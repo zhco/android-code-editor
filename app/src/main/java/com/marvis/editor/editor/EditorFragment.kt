@@ -13,6 +13,7 @@ class EditorFragment : Fragment() {
     private var currentFile: File? = null
     private lateinit var fileName: TextView
     private lateinit var editor: CodeEditor
+    private lateinit var toolbar: EditorToolbar
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val ctx = requireContext()
@@ -27,7 +28,7 @@ class EditorFragment : Fragment() {
             addView(fileName, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
-            val toolbar = EditorToolbar(ctx)
+            toolbar = EditorToolbar(ctx)
             addView(toolbar, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
@@ -37,6 +38,10 @@ class EditorFragment : Fragment() {
 
             toolbar.setEditor(editor)
         }
+    }
+
+    fun setDrawerCallback(callback: () -> Unit) {
+        toolbar.setDrawerCallback(callback)
     }
 
     fun openFile(file: File) {
