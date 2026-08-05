@@ -156,3 +156,13 @@ class EditorToolbar @JvmOverloads constructor(
             ?.findFragmentById(R.id.editor_container) as? EditorFragment
         return fragment?.getCurrentFile()
     }
+
+    private fun findProjectRoot(file: File): File? {
+        var dir: File? = file.parentFile
+        while (dir != null) {
+            if (File(dir, "gradlew").exists()) return dir
+            dir = dir.parentFile
+        }
+        return null
+    }
+}
