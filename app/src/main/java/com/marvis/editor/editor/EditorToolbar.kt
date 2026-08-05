@@ -49,6 +49,7 @@ class EditorToolbar @JvmOverloads constructor(
                 minimumWidth = (36 * context.resources.displayMetrics.density).toInt()
                 minimumHeight = (36 * context.resources.displayMetrics.density).toInt()
                 text = label
+                setTextColor(0xFFFFFFFF.toInt())
             }
             row.addView(btn)
             return btn
@@ -64,19 +65,19 @@ class EditorToolbar @JvmOverloads constructor(
             })
         }
 
-        btnHamburger = makeBtn("☰")
+        btnHamburger = makeBtn(context.getString(R.string.hamburger))
         separator()
-        btnCopy = makeBtn("Cp")
-        btnPaste = makeBtn("Ps")
-        btnSelectAll = makeBtn("SA")
+        btnCopy = makeBtn(context.getString(R.string.btn_copy))
+        btnPaste = makeBtn(context.getString(R.string.btn_paste))
+        btnSelectAll = makeBtn(context.getString(R.string.btn_select_all))
         separator()
-        btnUndo = makeBtn("<-")
-        btnRedo = makeBtn("->")
+        btnUndo = makeBtn(context.getString(R.string.btn_undo))
+        btnRedo = makeBtn(context.getString(R.string.btn_redo))
         separator()
-        btnReplace = makeBtn("Rp")
-        btnSave = makeBtn("Sv")
+        btnReplace = makeBtn(context.getString(R.string.btn_replace))
+        btnSave = makeBtn(context.getString(R.string.btn_save))
         separator()
-        btnBuild = makeBtn("Bld")
+        btnBuild = makeBtn(context.getString(R.string.btn_build))
 
         btnHamburger.setOnClickListener { drawerCallback?.invoke() }
 
@@ -105,7 +106,9 @@ class EditorToolbar @JvmOverloads constructor(
     }
 
     private fun copy() {
-        val text = editor?.text?.substring(editor!!.cursor.left, editor!!.cursor.right) ?: return
+        val e = editor ?: return
+        val text = e.text?.substring(e.cursor.left, e.cursor.right)
+        if (text.isNullOrEmpty()) return
         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(ClipData.newPlainText("code", text))
         Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show()
@@ -130,35 +133,26 @@ class EditorToolbar @JvmOverloads constructor(
     }
 
     private fun save() {
-        val file = (context as? androidx.fragment.app.FragmentActivity)
-            ?.supportFragmentManager
-            ?.findFragmentById(R.id.editor_container) as? EditorFragment
-        val f = file?.getCurrentFile() ?: return
+        val f = getCurrentFile() ?: return
         f.writeText(editor?.text?.toString() ?: return)
         Toast.makeText(context, R.string.saved, Toast.LENGTH_SHORT).show()
     }
 
     private fun build() {
-        val file = (context as? androidx.fragment.app.FragmentActivity)
-            ?.supportFragmentManager
-            ?.findFragmentById(R.id.editor_container) as? EditorFragment
-        val f = file?.getCurrentFile() ?: run {
-            Toast.makeText(context, "No file open", Toast.LENGTH_SHORT).show()
+        val f = getCurrentFile() ?: run {
+            Toast.makeText(context, "未打开文件", Toast.LENGTH_SHORT).show()
             return
         }
         val projectDir = findProjectRoot(f) ?: run {
-            Toast.makeText(context, "gradlew not found in parent directories", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "未找到 gradlew", Toast.LENGTH_SHORT).show()
             return
         }
         BuildManager(context).showOutputDialog(context, projectDir)
     }
 
-    private fun findProjectRoot(file: File): File? {
-        var dir: File? = file.parentFile
-        while (dir != null) {
-            if (File(dir, "gradlew").exists()) return dir
-            dir = dir.parentFile
-        }
-        return null
+    private fun getCurrentFile(): File? {
+        return (context as? androidx.fragment.app.FragmentActivity)
+            ?.supportFragmentManager
+            ?.findFragmentById(R.id.editor_container) as? EditorFragment
+        return fragment?.getCurrentFile()
     }
-}
