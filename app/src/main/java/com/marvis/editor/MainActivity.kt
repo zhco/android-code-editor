@@ -57,7 +57,6 @@ class MainActivity : AppCompatActivity() {
             .replace(editorContainer.id, editorFragment!!)
             .commit()
 
-        // Defer callback until fragment view is created
         editorContainer.post {
             editorFragment?.setDrawerCallback {
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
