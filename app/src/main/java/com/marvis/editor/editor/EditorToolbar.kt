@@ -151,7 +151,7 @@ class EditorToolbar @JvmOverloads constructor(
     }
 
     private fun getCurrentFile(): File? {
-        return (context as? androidx.fragment.app.FragmentActivity)
+        val fragment = (context as? androidx.fragment.app.FragmentActivity)
             ?.supportFragmentManager
             ?.findFragmentById(R.id.editor_container) as? EditorFragment
         return fragment?.getCurrentFile()
