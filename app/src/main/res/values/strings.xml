@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Code Editor</string>
-    <string name="new_file">New File</string>
-    <string name="new_folder">New Folder</string>
-    <string name="create">Create</string>
-    <string name="cancel">Cancel</string>
-    <string name="ok">OK</string>
-    <string name="rename">Rename</string>
-    <string name="delete">Delete</string>
-    <string name="import_project">Import Project</string>
-    <string name="imported">Imported: %1$s</string>
-    <string name="copied">Copied</string>
-    <string name="saved">Saved</string>
-    <string name="replace">Replace</string>
-    <string name="replace_all">Replace All</string>
-    <string name="find">Find</string>
-    <string name="replace_with">Replace with</string>
-    <string name="build">Build</string>
+    <string name="app_name">代码编辑器</string>
+    <string name="new_file">新建文件</string>
+    <string name="new_folder">新建文件夹</string>
+    <string name="create">创建</string>
+    <string name="cancel">取消</string>
+    <string name="ok">确定</string>
+    <string name="rename">重命名</string>
+    <string name="delete">删除</string>
+    <string name="import_project">导入项目</string>
+    <string name="imported">已导入: %1$s</string>
+    <string name="copied">已复制</string>
+    <string name="saved">已保存</string>
+    <string name="replace">替换</string>
+    <string name="replace_all">全部替换</string>
+    <string name="find">查找</string>
+    <string name="replace_with">替换为</string>
+    <string name="build">构建</string>
+    <string name="settings">设置</string>
+    <string name="hamburger">菜单</string>
+    <string name="btn_copy">复制</string>
+    <string name="btn_paste">粘贴</string>
+    <string name="btn_select_all">全选</string>
+    <string name="btn_undo">撤销</string>
+    <string name="btn_redo">重做</string>
+    <string name="btn_replace">替换</string>
+    <string name="btn_save">保存</string>
+    <string name="btn_build">构建</string>
 </resources>
