@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
-import android.widget.Toast
 import com.marvis.editor.build.BuildManager
 import io.github.rosemoe.sora.widget.CodeEditor
 import java.io.File
@@ -40,18 +39,18 @@ class EditorToolbar @JvmOverloads constructor(
             setPadding(4, 4, 4, 4)
         }
         fun btn(l: String) = Button(context).apply {
-            setPadding(8,8,8,8); minimumWidth=80; minimumHeight=80; text=l
-            setTextColor(0xFFFFFFFF.toInt()); row.addView(this)
+            setPadding(8, 8, 8, 8); minimumWidth = 80; minimumHeight = 80
+            text = l; setTextColor(0xFFFFFFFF.toInt()); row.addView(this)
         }
         fun sep() = row.addView(View(context).apply {
-            layoutParams=LinearLayout.LayoutParams(2,60).apply{setMargins(6,0,6,0)}
+            layoutParams = LinearLayout.LayoutParams(2, 60).apply { setMargins(6, 0, 6, 0) }
             setBackgroundColor(0xFF555555.toInt())
         })
-        btnHamburger=btn('☰'); sep()
-        btnCopy=btn('复制'); btnPaste=btn('粘贴'); btnSelectAll=btn('全选'); sep()
-        btnUndo=btn('撤销'); btnRedo=btn('重做'); sep()
-        btnReplace=btn('替换'); btnSave=btn('保存'); sep()
-        btnBuild=btn('构建')
+        btnHamburger = btn("☰"); sep()
+        btnCopy = btn("复制"); btnPaste = btn("粘贴"); btnSelectAll = btn("全选"); sep()
+        btnUndo = btn("撤销"); btnRedo = btn("重做"); sep()
+        btnReplace = btn("替换"); btnSave = btn("保存"); sep()
+        btnBuild = btn("构建")
         btnHamburger.setOnClickListener { drawerCallback?.invoke() }
         addView(row)
     }
@@ -68,22 +67,36 @@ class EditorToolbar @JvmOverloads constructor(
     }
 
     private fun copy() {
-        val e = editor ?: return; val t = e.text?.substring(e.cursor.left, e.cursor.right) ?: return
+        val e = editor ?: return
+        val t = e.text?.substring(e.cursor.left, e.cursor.right) ?: return
         (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-            .setPrimaryClip(ClipData.newPlainText('c', t))
+            .setPrimaryClip(ClipData.newPlainText("code", t))
     }
+
     private fun paste() {
         val s = (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
             .primaryClip?.getItemAt(0)?.text?.toString() ?: return
         editor?.commitText(s)
     }
+
     private fun selectAll() { editor?.selectAll() }
+
     private fun showReplaceDialog() {
-        ReplaceDialog(context) { o,n -> editor?.setText(editor?.text?.toString()?.replace(o,n,true)?:'') }.show()
+        ReplaceDialog(context) { old, new ->
+            editor?.setText(editor?.text?.toString()?.replace(old, new, true) ?: "")
+        }.show()
     }
+
     private fun save() { currentFile?.writeText(editor?.text?.toString() ?: return) }
+
     private fun build() {
-        val f = currentFile ?: return; var d: File? = f.parentFile
-        while (d != null) { if (File(d,'gradlew').exists()) { BuildManager(context).showOutputDialog(context,d); return }; d=d.parentFile }
+        val f = currentFile ?: return
+        var d: File? = f.parentFile
+        while (d != null) {
+            if (File(d, "gradlew").exists()) {
+                BuildManager(context).showOutputDialog(context, d); return
+            }
+            d = d.parentFile
+        }
     }
 }
